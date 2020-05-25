@@ -7,21 +7,12 @@ func main() {
 	card := "Ace of Spades"
 	card = "Ace of Clubs" // colon not necessary
 
-	card = newCard()
-
 	fmt.Println(card)
 
-	cards := []string{newCard(), newCard()}
-	cards = append(cards, "Six of Spades") // add on by recreating the slice
+	cards := newDeck()
 
-	for i, card := range cards {
-		fmt.Println(i, card)
-	}
+	cards.print()
 
 	fmt.Println(cards)
 
-}
-
-func newCard() string {
-	return "Five of Diamonds"
 }
