@@ -15,4 +15,10 @@ func main() {
 
 	fmt.Println(cards)
 
+	hand, remainingCards := deal(cards, 5) //assigning two values
+
+	hand.print()
+
+	remainingCards.print()
+
 }
