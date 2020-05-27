@@ -13,6 +13,8 @@ func main() {
 
 	cards.print()
 
+	cards.saveToFile("myCards")
+
 	fmt.Println(cards)
 
 	hand, remainingCards := deal(cards, 5) //assigning two values
@@ -20,5 +22,7 @@ func main() {
 	hand.print()
 
 	remainingCards.print()
+
+	fmt.Println(cards.toString())
 
 }
