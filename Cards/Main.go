@@ -15,6 +15,10 @@ func main() {
 
 	cards.saveToFile("myCards")
 
+	cards = newDeckFromFile("myCards")
+
+	cards.print()
+
 	fmt.Println(cards)
 
 	hand, remainingCards := deal(cards, 5) //assigning two values
