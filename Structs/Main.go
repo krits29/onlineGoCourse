@@ -26,7 +26,7 @@ func main() {
 
 	//fmt.Printf("%+v", alex)
 
-	jim := Person {
+	jim := &Person {
 		firstName: "Bob",
 		lastName:  "Jones",
 		contact: ContactInfo {
@@ -36,4 +36,18 @@ func main() {
 	}
 
 	fmt.Printf("%+v", jim)
+	fmt.Println()
+	jim.print()
+
+	jim.updateName("jimmy")
+	jim.print()
+}
+
+func (p *Person) updateName(newFirstName string) {
+	p.firstName = newFirstName
+}
+
+func (p Person) print() {
+	fmt.Printf("%+v", p)
+	fmt.Println()
 }
