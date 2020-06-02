@@ -2,19 +2,25 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 )
 
 func main() {
-	resp, err := http.Get("http://google.com")
+	resp, err := http.Get("https://scioly.org/wiki/index.php/2021")
 
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
 
-	bs := make([]byte, 99999)
-	resp.Body.Read(bs)
-	fmt.Println(string(bs))
+	// // bs := make([]byte, 99999)
+	// // resp.Body.Read(bs)
+	// // fmt.Println(string(bs))
+
+	// //same thing in just one line
+
+	io.Copy(os.Stdout, resp.Body) //takes something that implements teh writer interface and the reafer interface
+
 }
