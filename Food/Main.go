@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"strconv"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -22,7 +22,7 @@ var foods []Food
 func main() {
 	router := mux.NewRouter()
 	router.Headers("Content-Type", "application/json",
-          "X-Requested-With", "XMLHttpRequest")
+		"X-Requested-With", "XMLHttpRequest")
 
 	foods = append(foods, Food{1, "Pasta", "https://pasta.com", 0, 0}, Food{2, "Soup", "sdfs", 0, 0}, Food{3, "Pizza", "https://pizza.com", 0, 0})
 
@@ -42,7 +42,7 @@ func getFoods(w http.ResponseWriter, r *http.Request) {
 func getFood(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	i,_ := strconv.Atoi(params["id"])
+	i, _ := strconv.Atoi(params["id"])
 
 	for _, food := range foods {
 		if food.ID == i {
@@ -53,11 +53,32 @@ func getFood(w http.ResponseWriter, r *http.Request) {
 }
 
 func addFood(w http.ResponseWriter, r *http.Request) {
-	log.Println("Add food")
+	//log.Println("Add food")
+	var food Food
+
+	json.NewDecoder(r.Body).Decode(&food)
+
+	foods = append(foods, food) //adding on
+
+	json.NewEncoder(w).Encode(foods)
 }
 
 func updateFood(w http.ResponseWriter, r *http.Request) {
 	log.Println("Update food")
+
+	var food Food
+
+	json.NewDecoder(r.Body).Decode(&food)
+
+	//looking for a value in the array that matches with the sae value given
+
+	for i, f := range foods {
+		if f.ID == food.ID {
+			foods[i] = food
+		}
+	}
+
+	json.NewEncoder(w).Encode(foods)
 }
 
 func removeFood(w http.ResponseWriter, r *http.Request) {
