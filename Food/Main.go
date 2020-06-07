@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+//Food is
 type Food struct {
 	ID     int    `json:"id"`
 	Title  string `json:"title"`
@@ -66,7 +67,7 @@ func addFood(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateFood(w http.ResponseWriter, r *http.Request) {
-	log.Println("Update food")  //call debugging purpose
+	log.Println("Update food") //call debugging purpose
 
 	var food Food
 
@@ -85,22 +86,26 @@ func updateFood(w http.ResponseWriter, r *http.Request) {
 }
 
 func removeFood(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)    //returns all the parameters in the request
+	params := mux.Vars(r) //returns all the parameters in the request
 
 	//need to convert because the number is interpreted as a string
 	id, _ := strconv.Atoi(params["id"])
 
-	var newFood []Food
+	// var newFood []Food
+
+	// for i, food := range foods {
+	// 	if food.ID != id {
+	// 		newFood = append(newFood, foods[i])
+	// 	}
+	// }
+
+	// foods = newFood
 
 	for i, food := range foods {
-		if food.ID != id {
-			newFood = append(newFood, foods[i])
+		if food.ID == id {
+			foods = append(foods[:i], foods[i+1:]...)
 		}
 	}
-
-
-
-	foods = newFood
 
 	json.NewEncoder(w).Encode(foods)
 }
