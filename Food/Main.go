@@ -42,6 +42,7 @@ func getFoods(w http.ResponseWriter, r *http.Request) {
 func getFood(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
+	//need to convert because the number is interpreted as a string
 	i, _ := strconv.Atoi(params["id"])
 
 	for _, food := range foods {
@@ -60,27 +61,46 @@ func addFood(w http.ResponseWriter, r *http.Request) {
 
 	foods = append(foods, food) //adding on
 
+	//final operation needed when making changes (kind of like a return)
 	json.NewEncoder(w).Encode(foods)
 }
 
 func updateFood(w http.ResponseWriter, r *http.Request) {
-	log.Println("Update food")
+	log.Println("Update food")  //call debugging purpose
 
 	var food Food
 
 	json.NewDecoder(r.Body).Decode(&food)
 
-	//looking for a value in the array that matches with the sae value given
+	//looking for a value in the array that matches with the same value given
 
-	for i, f := range foods {
-		if f.ID == food.ID {
+	for i, foood := range foods {
+		if foood.ID == food.ID {
 			foods[i] = food
 		}
 	}
 
+	//final operation needed when making changes (kind of like a return)
 	json.NewEncoder(w).Encode(foods)
 }
 
 func removeFood(w http.ResponseWriter, r *http.Request) {
-	log.Println("Remove book")
+	params := mux.Vars(r)    //returns all the parameters in the request
+
+	//need to convert because the number is interpreted as a string
+	id, _ := strconv.Atoi(params["id"])
+
+	var newFood []Food
+
+	for i, food := range foods {
+		if food.ID != id {
+			newFood = append(newFood, foods[i])
+		}
+	}
+
+
+
+	foods = newFood
+
+	json.NewEncoder(w).Encode(foods)
 }
