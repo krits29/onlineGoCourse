@@ -1,46 +1,44 @@
 package main
 
-import "fmt"
+import (
+	"database/sql"
+	"fmt"
 
-type Person struct {
-	firstName string
-	lastName  string
-	contact   ContactInfo  //can also leave it at just contactInfo
-}
+	"log"
+	"net/http"
 
-type ContactInfo struct {
-	email   string
-	zipCode int
-}
+	"github.com/gorilla/mux"
+	_ "github.com/mattn/go-sqlite3"
+
+	"FoodsRefactored/controllers"
+	"FoodsRefactored/driver"
+	"FoodsRefactored/models"
+)
+
+var foods []models.Food
+
+var database *sql.DB
 
 func main() {
-	//alex := Person{"Alex", "Anderson"} //creating a new struct
 
-	//alex := person{firstName: "Alex", lastName: "Anderson"} to specify
+	database = driver.ConnectDB()
+	defer database.Close()
+	controller := controllers.Controller{}
 
-	// var alex person
+	router := mux.NewRouter()
+	router.Headers("Content-Type", "application/json",
+		"X-Requested-With", "XMLHttpRequest")
 
-	//fmt.Println(alex)
+	router.HandleFunc("/foods", controller.GetFoods(database)).Methods("GET")
+	router.HandleFunc("/food/{id}", controller.GetFood(database)).Methods("GET")
+	router.HandleFunc("/foods", controller.AddFood(database)).Methods("POST")
+	router.HandleFunc("/foods", controller.UpdateFood(database)).Methods("PUT")
+	router.HandleFunc("/food/{id}", controller.RemoveFood(database)).Methods("DELETE")
+	//router.HandleFUnc("/register", ????).Methods("POST")
+	//router.HandleFUnc("/login", ????).Methods("POST")
+	//router.HandleFUnc("/logout", ????).Methods("POST")
 
-	//alex.lastName = "A" //using dots instead of getter
+	fmt.Println("Server is running")
 
-	//fmt.Printf("%+v", alex)
-
-	jim := Person {
-		firstName: "Bob",
-		lastName:  "Jones",
-		contact: ContactInfo {
-			email:   "jim@email.com",
-			zipCode: 43563,
-		},
-	}
-
-	fmt.Printf("%+v", jim)
-	fmt.Println()
-	jim.print()
-	fmt.Println()
-}
-
-func (p Person) print() {
-	fmt.Printf("%+v", p)
+	log.Fatal(http.ListenAndServe(":8000", router))
 }
