@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"FoodsRefactored/models"
+	"FoodsRefactored/utils"
 	"database/sql"
 	"encoding/json"
 	"strings"
@@ -12,7 +13,63 @@ import (
 	// 	"github.com/gorilla/mux"
 )
 
-func (c Controller) Validate(action string) error {
+func (c Controller) Login(database *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var resp = map[string]interface{}{"status": "success", "message": "logged in"}
+
+		var error models.Error
+
+		user := &models.User{}
+		body, err := ioutil.ReadAll(r.Body) // read user input from request
+		checkErr(err)
+
+		err = json.Unmarshal(body, &user)
+		checkErr(err)
+
+		//user.Prepare() // here strip the text of white spaces
+
+		err = validate("login") // fields(email, password) are validated
+		checkErr(err)
+
+		//ToDo
+		usr, err := GetUser(database) //mismatch return types and number???
+		checkErr(err)
+
+		if usr == nil { // user is not registered
+			//resp["status"] = "failed"
+			//resp["message"] = "Login failed, please signup"
+			//responses.JSON(w, http.StatusBadRequest, resp)
+
+			error.Message = "Login failed, please signup"
+			utils.SendError(w, http.StatusBadRequest, error)
+			return
+		}
+
+		err = utils.CheckPasswordHash(user.Password, usr.Password)
+		if err != nil {
+			//resp["status"] = "failed"
+			//resp["message"] = "Login failed, please try again"
+			//responses.JSON(w, http.StatusForbidden, resp)
+
+			error.Message = "Login failed, please try again"
+			utils.SendError(w, http.StatusBadRequest, error)
+			return
+		}
+		// user is authenticated
+
+		token, err := utils.EncodeAuthToken(usr.ID)
+		checkErr(err)
+
+		//resp["token"] = token
+
+		//explain??
+		error.Message = token
+		utils.SendError(w, http.StatusBadRequest, error)
+		return
+	}
+}
+
+func validate(action string) error {
 	var user models.User
 	var errors models.Error
 	switch strings.ToLower(action) {
@@ -43,48 +100,6 @@ func (c Controller) Validate(action string) error {
 		// 	//return
 		// }
 		return nil
-	}
-}
-
-func (c Controller) Login(database *sql.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var resp = map[string]interface{}{"status": "success", "message": "logged in"}
-
-		user := &models.User{}
-		body, err := ioutil.ReadAll(r.Body) // read user input from request
-		checkErr(err)
-
-		err = json.Unmarshal(body, &user)
-		checkErr(err)
-
-		//user.Prepare() // here strip the text of white spaces
-
-		// err = user.Validate("login") // fields(email, password) are validated
-		// checkErr(err)
-
-		usr, err := GetUser(database) //mismatch return types and number???
-		checkErr(err)
-
-		if usr == nil { // user is not registered
-			resp["status"] = "failed"
-			resp["message"] = "Login failed, please signup"
-			//responses.JSON(w, http.StatusBadRequest, resp)
-			return
-		}
-
-		err = models.CheckPasswordHash(user.Password, usr.Password)
-		if err != nil {
-			resp["status"] = "failed"
-			resp["message"] = "Login failed, please try again"
-			responses.JSON(w, http.StatusForbidden, resp)
-			return
-		}
-		token, err := utils.EncodeAuthToken(usr.ID)
-		checkErr(err)
-
-		resp["token"] = token
-		responses.JSON(w, http.StatusOK, resp)
-		return
 	}
 }
 
