@@ -14,6 +14,7 @@ import (
 
 var users []models.User
 
+//GetUsers is
 func (c Controller) GetUsers(database *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user models.User
@@ -35,6 +36,7 @@ func (c Controller) GetUsers(database *sql.DB) http.HandlerFunc {
 	}
 }
 
+//GetUser is
 func (c Controller) GetUser(database *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -52,9 +54,22 @@ func (c Controller) GetUser(database *sql.DB) http.HandlerFunc {
 
 //plain method -- nothing fancy
 
-//func GetUserMethod 
+//GetUserMethod is
+func GetUserMethod(database *sql.DB, w http.ResponseWriter, r *http.Request) (models.User, error) {
+	user := models.User{}
+	params := mux.Vars(r)
 
+	rows := database.QueryRow("select * from user where id=?;", params["id"])
 
+	err := rows.Scan(&user.ID, &user.Username, &user.Password)
+	checkErr(err)
+	// handle if no entry is found
+	json.NewEncoder(w).Encode(user)
+
+	return user, err
+}
+
+//AddUser is
 func (c Controller) AddUser(database *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		//create variable type food
@@ -81,6 +96,7 @@ func (c Controller) AddUser(database *sql.DB) http.HandlerFunc {
 	}
 }
 
+//UpdateUser is
 func (c Controller) UpdateUser(database *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user models.User
@@ -103,6 +119,7 @@ func (c Controller) UpdateUser(database *sql.DB) http.HandlerFunc {
 	}
 }
 
+//RemoveUser is
 func (c Controller) RemoveUser(database *sql.DB) http.HandlerFunc { //food := Food{}
 	return func(w http.ResponseWriter, r *http.Request) {
 		//invoing vars on mux to request the object which will return a map with key value pairs
