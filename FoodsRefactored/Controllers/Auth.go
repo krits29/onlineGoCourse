@@ -32,8 +32,8 @@ func (c Controller) Login(database *sql.DB) http.HandlerFunc {
 		err = validate("login") // fields(email, password) are validated
 		checkErr(err)
 
-		//ToDo
-		fetchedUser, err := GetUserMethod(database, w, r) //mismatch return types and number???
+		// Get this user from the database
+		fetchedUser, err := GetUserFromDB(database, user)
 		checkErr(err)
 
 		//is this correct
