@@ -50,6 +50,11 @@ func (c Controller) GetUser(database *sql.DB) http.HandlerFunc {
 	}
 }
 
+//plain method -- nothing fancy
+
+//func GetUserMethod 
+
+
 func (c Controller) AddUser(database *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		//create variable type food
