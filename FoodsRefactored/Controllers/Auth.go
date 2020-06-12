@@ -13,9 +13,10 @@ import (
 	// 	"github.com/gorilla/mux"
 )
 
+//Login is
 func (c Controller) Login(database *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var resp = map[string]interface{}{"status": "success", "message": "logged in"}
+		//var resp = map[string]interface{}{"status": "success", "message": "logged in"}
 
 		var error models.Error
 
@@ -32,10 +33,12 @@ func (c Controller) Login(database *sql.DB) http.HandlerFunc {
 		checkErr(err)
 
 		//ToDo
-		usr, err := GetUser(database) //mismatch return types and number???
+		fetchedUser, err := GetUserMethod(database, w, r) //mismatch return types and number???
 		checkErr(err)
 
-		if usr == nil { // user is not registered
+		//is this correct
+
+		if fetchedUser.ID == 0 { // user is not registered
 			//resp["status"] = "failed"
 			//resp["message"] = "Login failed, please signup"
 			//responses.JSON(w, http.StatusBadRequest, resp)
@@ -45,7 +48,7 @@ func (c Controller) Login(database *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		err = utils.CheckPasswordHash(user.Password, usr.Password)
+		err = utils.CheckPasswordHash(user.Password, fetchedUser.Password)
 		if err != nil {
 			//resp["status"] = "failed"
 			//resp["message"] = "Login failed, please try again"
@@ -57,7 +60,7 @@ func (c Controller) Login(database *sql.DB) http.HandlerFunc {
 		}
 		// user is authenticated
 
-		token, err := utils.EncodeAuthToken(usr.ID)
+		token, err := utils.EncodeAuthToken(fetchedUser.ID)
 		checkErr(err)
 
 		//resp["token"] = token
