@@ -2,8 +2,10 @@ package controllers
 
 import (
 	"FoodsRefactored/models"
+	"FoodsRefactored/utils"
 	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -43,34 +45,34 @@ func (c Controller) GetUser(database *sql.DB) http.HandlerFunc {
 		user := models.User{}
 		params := mux.Vars(r)
 
-		rows := database.QueryRow("select * from user where id=?;", params["id"])
+		rows := database.QueryRow("select * from users where id=?;", params["id"])
+
+		user.Password = ""
 
 		err := rows.Scan(&user.ID, &user.Username, &user.Password)
 		checkErr(err)
 		// handle if no entry is found
+		
 		json.NewEncoder(w).Encode(user)
 	}
 }
 
 //plain method -- nothing fancy
 
-//GetUserMethod is
-func GetUserMethod(database *sql.DB, w http.ResponseWriter, r *http.Request) (models.User, error) {
-	user := models.User{}
-	params := mux.Vars(r)
+//GetUserFromDB is
+func GetUserFromDB(database *sql.DB, user *models.User) (*models.User, error) {
 
-	rows := database.QueryRow("select * from user where id=?;", params["id"])
+	dbUser := &models.User{}
+	log.Println(user.Username)
+	rows := database.QueryRow("select * from users where username=?;", user.Username)
 
-	err := rows.Scan(&user.ID, &user.Username, &user.Password)
+	err := rows.Scan(&dbUser.ID, &dbUser.Username, &dbUser.Password)
 	checkErr(err)
-	// handle if no entry is found
-	json.NewEncoder(w).Encode(user)
-
-	return user, err
+	return dbUser, err
 }
 
-//AddUser is
-func (c Controller) AddUser(database *sql.DB) http.HandlerFunc {
+//Register is
+func (c Controller) Register(database *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		//create variable type food
 		var user models.User
@@ -86,13 +88,16 @@ func (c Controller) AddUser(database *sql.DB) http.HandlerFunc {
 		statement, err := database.Prepare(query)
 		checkErr(err)
 		defer statement.Close()
+		hashedPassword, _ := utils.HashPassword(user.Password)
 
-		result, err := statement.Exec(&user.Username, &user.Password)
+		result, err := statement.Exec(&user.Username, hashedPassword)
 
 		id, err := result.LastInsertId()
 		checkErr(err)
 
 		json.NewEncoder(w).Encode(id)
+
+		log.Println("register successful", user)
 	}
 }
 
@@ -125,7 +130,7 @@ func (c Controller) RemoveUser(database *sql.DB) http.HandlerFunc { //food := Fo
 		//invoing vars on mux to request the object which will return a map with key value pairs
 		params := mux.Vars(r)
 
-		statement, err := database.Prepare("delete from items where id=?;")
+		statement, err := database.Prepare("delete from users where id=?;")
 		checkErr(err)
 		defer statement.Close()
 
